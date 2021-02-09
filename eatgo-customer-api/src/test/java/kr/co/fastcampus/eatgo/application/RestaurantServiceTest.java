@@ -1,8 +1,6 @@
 package kr.co.fastcampus.eatgo.application;
 
-import kr.co.fastcampus.eatgo.domain.Restaurant;
-import kr.co.fastcampus.eatgo.domain.RestaurantNotFoundException;
-import kr.co.fastcampus.eatgo.domain.RestaurantRepository;
+import kr.co.fastcampus.eatgo.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -15,7 +13,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 class RestaurantServiceTest {
 
@@ -24,14 +24,30 @@ class RestaurantServiceTest {
     @Mock
     private RestaurantRepository restaurantRepository;
 
+    @Mock
+    private MenuItemRepository menuItemRepository;
+    @Mock
+    private ReviewRepository reviewRepository;
 
     @BeforeEach
     public void setUp(){
         MockitoAnnotations.initMocks(this); // @mock 처리 된 변수에 적절한 객체를 연결해줌
 
         mockRestaurantRepository();
+        mockReviewRepository();
+        mockMenuItemRepository();
 
-        restaurantService = new RestaurantService(restaurantRepository);
+        restaurantService = new RestaurantService(restaurantRepository, menuItemRepository, reviewRepository);
+    }
+
+    private void mockMenuItemRepository() {
+        List<MenuItem> menuItems = new ArrayList<>();
+        menuItems.add(MenuItem
+                .builder()
+                .name("Kimchi")
+                .build());
+
+        given(menuItemRepository.findAllByRestaurantId(1004L)).willReturn(menuItems);
     }
 
     private void mockRestaurantRepository() {
@@ -44,13 +60,25 @@ class RestaurantServiceTest {
 
         restaurants.add(restaurant);
 
-        given(restaurantRepository.findAll()).willReturn(restaurants);
-        given(restaurantRepository.findById(1004L)).willReturn(java.util.Optional.of(restaurant));
+        given(restaurantRepository.findAllByAddressContaining("seoul")).willReturn(restaurants);
+        given(restaurantRepository.findById(1004L)).willReturn(Optional.of(restaurant));
+    }
+
+    private void mockReviewRepository() {
+        List<Review> reviews = new ArrayList<>();
+        reviews.add(Review.builder()
+                .name("dongho")
+                .score(2)
+                .description("good as hell")
+                .build());
+        given(reviewRepository.findAllByRestaurantId(1004L)).willReturn(reviews);
     }
 
     @Test
     public void getRestaurants(){
-        List<Restaurant> restaurants = restaurantService.getRestaurants();
+
+        String region = "seoul";
+        List<Restaurant> restaurants = restaurantService.getRestaurants(region);
 
         Restaurant restaurant = restaurants.get(0);
         assertEquals(restaurant.getId(), 1004L);
@@ -60,7 +88,16 @@ class RestaurantServiceTest {
     public void getRestaurantWithExisted(){
         Restaurant restaurant = restaurantService.getRestaurantById(1004L);
 
+        verify(menuItemRepository).findAllByRestaurantId(eq(1004L));
+        verify(reviewRepository).findAllByRestaurantId(eq(1004L));
+
+        MenuItem menuItem = restaurant.getMenuItems().get(0);
+
+        assertEquals(menuItem.getName(), "Kimchi");
         assertEquals(restaurant.getId(), 1004L);
+
+        Review review = restaurant.getReviews().get(0);
+        assertEquals(review.getDescription(), "good as hell");
     }
 
     @Test

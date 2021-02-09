@@ -4,11 +4,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class EatgoAdminApplication {
+public class EatgoAdminApiApplication {
 
 	public static void main(String[] args) {
 
-		SpringApplication.run(EatgoAdminApplication.class, args);
+		SpringApplication.run(EatgoAdminApiApplication.class, args);
 	}
 
 }

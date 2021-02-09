@@ -10,8 +10,10 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -24,12 +26,25 @@ class MenuItemServiceTest {
 
     @BeforeEach
     public void setUp(){
-        MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.initMocks(this);
 
         menuItemService = new MenuItemService(menuItemRepository);//생성자는 원래 스프링에서는 컨테이너가 자동으로 의존성을 주입해주지만 테스트에서는 스프링 컨테이너에서 돌리는게 아니기 때문에 생성자로 의존성을 주입해줘야한다.
     }
 
+    @Test
+    public void getMenuItems(){
+        List<MenuItem> mockMenuItems = new ArrayList<>();
+        mockMenuItems.add(MenuItem.builder().name("Kimchi").build());
 
+        given(menuItemRepository.findAllByRestaurantId(1004L)).willReturn(mockMenuItems);
+
+        List<MenuItem> menuItems = menuItemService.getMenuItems(1004L);
+
+        MenuItem menuItem = menuItems.get(0);
+
+        assertEquals(menuItem.getName(), "Kimchi");
+
+    }
 
     @Test
     public void bulkUpdate(){
