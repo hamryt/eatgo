@@ -45,13 +45,14 @@ class RestaurantControllerTest {
         List<Restaurant> restaurants = new ArrayList<>();
         restaurants.add(Restaurant.builder()
                 .id(1004L)
+                .categoryId(1L)
                 .name("Bobs zip")
                 .address("Seoul")
                 .build());
 
-        given(restaurantService.getRestaurants("seoul")).willReturn(restaurants);
+        given(restaurantService.getRestaurants("seoul", 1L)).willReturn(restaurants);
 
-        mvc.perform(get("/restaurants?region=seoul"))
+        mvc.perform(get("/restaurants?region=seoul&category=1"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(
                         containsString("\"id\":1004")
