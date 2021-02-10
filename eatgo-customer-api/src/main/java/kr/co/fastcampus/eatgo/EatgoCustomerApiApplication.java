@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class EatgoCustomerApiApplication {
 
 	public static void main(String[] args) {
-
 		SpringApplication.run(EatgoCustomerApiApplication.class, args);
 	}
 
